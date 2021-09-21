@@ -11,8 +11,8 @@
   ],
   "private": true,
   "scripts": {
-    "build": "yarn workspaces build",
-    "server": "yarn workspace server start",
-    "simulateVoting": "yarn workspace client simulateVoting"
+    "build": "yarn workspaces run build",
+    "server": "yarn workspace server run start",
+    "simulateVoting": "yarn workspace client run simulateVoting"
   }
 }
