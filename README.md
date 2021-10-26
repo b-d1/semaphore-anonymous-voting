@@ -110,8 +110,8 @@ In order to be able to participate in the voting activities, the clients need to
 
 ```typescript
 
-    const identity: Identity = FastSemaphore.genIdentity();
-    const identityCommitment: BigInt = FastSemaphore.genIdentityCommitment(identity);
+    const identity: ZkIdentity = new ZkIdentity();
+    const identityCommitment: BigInt = identity.genIdentityCommitment();
 
     // Register to the voting app
     const leafIndex = await register(identityCommitment);
@@ -129,7 +129,7 @@ The inputs for proof generation are:
 The users have everything locally, they just need to obtain the witness from the server, which they can easily do so by only having to provide their index in the tree:
 
 ```typescript
-    const witness = await getWitness(leafIndex);
+    const merkleProof = await getWitness(leafIndex);
 ```
 
 
@@ -137,16 +137,18 @@ After that, the users can generate a proof and vote:
 
 ```typescript
 
-    const externalNullifier = FastSemaphore.genExternalNullifier(campaignName);
-    const fullProof = await FastSemaphore.genProofFromBuiltTree(identity, witness, externalNullifier , voteOption, CIRCUIT_PATH, PROVER_KEY_PATH);
-    const nullifierHash: BigInt = FastSemaphore.genNullifierHash(externalNullifier, identity.identityNullifier, 20);
+    const externalNullifier = genExternalNullifier(campaignName);
+    const witness: FullProof = await Semaphore.genWitness(identity.getIdentity(), merkleProof, externalNullifier , voteOption);
+    const nullifierHash: BigInt = Semaphore.genNullifierHash(externalNullifier, identity.getNullifier(), 20);
+
+    const fullProof: FullProof = await Semaphore.genProof(witness, CIRCUIT_PATH, PROVER_KEY_PATH)
 
     const voteParameters = {
         proof: fullProof.proof,
         nullifier: nullifierHash.toString(),
         vote: voteOption,
         campaignName
-    };
+    }
 
     await axios.post(`${API_BASE_URL}/vote`, voteParameters)
 ```

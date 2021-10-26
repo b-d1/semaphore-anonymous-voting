@@ -7,7 +7,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.4",
-    "semaphore-lib": "git+https://github.com/akinovak/semaphore-lib.git#dev"
+    "@libsem/identity": "^1.0.17",
+    "@libsem/protocols": "^1.0.21"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",

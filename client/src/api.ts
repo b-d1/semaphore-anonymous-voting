@@ -1,10 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import axios from 'axios';
-import {
-    FastSemaphore,
-    IProof, Identity
-} from "semaphore-lib";
+
+import {ZkIdentity} from "@libsem/identity"
+import { MerkleProof, FullProof, genSignalHash, genExternalNullifier, Semaphore } from "@libsem/protocols"
 
 const PROVER_KEY_PATH: string = path.join('./circuitFiles', 'semaphore_final.zkey');
 const CIRCUIT_PATH: string = path.join('./circuitFiles', 'semaphore.wasm');
@@ -12,7 +11,6 @@ const CIRCUIT_PATH: string = path.join('./circuitFiles', 'semaphore.wasm');
 const API_BASE_URL = 'http://localhost:8080'
 
 
-FastSemaphore.setHasher('poseidon');
 
 
 const register = async (identityCommitment: BigInt) => {
@@ -26,12 +24,14 @@ const getCampaigns = async (): Promise<object> => {
     return result.data;
 };
 
-const vote = async (identity: Identity, leafIndex: number, campaignName: string, voteOption: string) => {
+const vote = async (identity: ZkIdentity, leafIndex: number, campaignName: string, voteOption: string) => {
 
-    const witness = await getWitness(leafIndex);
-    const externalNullifier = FastSemaphore.genExternalNullifier(campaignName);
-    const fullProof = await FastSemaphore.genProofFromBuiltTree(identity, witness, externalNullifier , voteOption, CIRCUIT_PATH, PROVER_KEY_PATH);
-    const nullifierHash: BigInt = FastSemaphore.genNullifierHash(externalNullifier, identity.identityNullifier, 20);
+    const merkleProof = await getWitness(leafIndex);
+    const externalNullifier = genExternalNullifier(campaignName);
+    const witness: FullProof = await Semaphore.genWitness(identity.getIdentity(), merkleProof, externalNullifier , voteOption);
+    const nullifierHash: BigInt = Semaphore.genNullifierHash(externalNullifier, identity.getNullifier(), 20);
+
+    const fullProof: FullProof = await Semaphore.genProof(witness, CIRCUIT_PATH, PROVER_KEY_PATH)
 
     const voteParameters = {
         proof: fullProof.proof,

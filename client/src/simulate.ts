@@ -1,16 +1,13 @@
 // Single user vote
 
 import {register, vote, getCampaigns} from './api'
-import {
-    FastSemaphore,
-    Identity
-} from "semaphore-lib";
+import {ZkIdentity} from "@libsem/identity"
 
 
 const simulateVotingMultipleUsers = async () => {
 
-    const identityUser1: Identity = FastSemaphore.genIdentity();
-    const identityCommitmentUser1: BigInt = FastSemaphore.genIdentityCommitment(identityUser1);
+    const identityUser1: ZkIdentity = new ZkIdentity();
+    const identityCommitmentUser1: BigInt = identityUser1.genIdentityCommitment();
 
     // Register user 1 to the voting app
     const leafIndexUser1 = await register(identityCommitmentUser1);
@@ -35,8 +32,8 @@ const simulateVotingMultipleUsers = async () => {
     }
 
 
-    const identityUser2: Identity = FastSemaphore.genIdentity();
-    const identityCommitmentUser2: BigInt = FastSemaphore.genIdentityCommitment(identityUser2);
+    const identityUser2: ZkIdentity = new ZkIdentity();
+    const identityCommitmentUser2: BigInt = identityUser2.genIdentityCommitment();
 
     // Register  user 2 to the voting app
     const leafIndexUser2 = await register(identityCommitmentUser2);
@@ -56,4 +53,6 @@ const simulateVotingMultipleUsers = async () => {
 
 };
 
-simulateVotingMultipleUsers();
+simulateVotingMultipleUsers().then(() => {
+    process.exit(0);
+});

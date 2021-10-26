@@ -1,16 +1,13 @@
 // Single user vote
 
 import {register, vote, getCampaigns} from './api'
-import {
-    FastSemaphore,
-    Identity
-} from "semaphore-lib";
+import {ZkIdentity} from "@libsem/identity"
 
 
 const main = async () => {
 
-    const identity: Identity = FastSemaphore.genIdentity();
-    const identityCommitment: BigInt = FastSemaphore.genIdentityCommitment(identity);
+    const identity: ZkIdentity = new ZkIdentity();
+    const identityCommitment: BigInt = identity.genIdentityCommitment();
 
     // Register to the voting app
     const leafIndex = await register(identityCommitment);
@@ -25,8 +22,9 @@ const main = async () => {
     console.log("Voting stats:");
 
     console.log(campaigns);
-    return;
 
 };
 
-main();
+main().then(() => {
+    process.exit(0);
+});

@@ -1,10 +1,11 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import {
-    FastSemaphore,
-    IProof
-} from "semaphore-lib";
+import {ZkIdentity} from "@libsem/identity"
+import { MerkleProof, FullProof, genSignalHash, genExternalNullifier, Semaphore } from "@libsem/protocols"
+import poseidonHash from './hasher';
+const Tree = require("incrementalquintree/build/IncrementalQuinTree")
+
 import {
     VotingInputs,
     UserNullifier
@@ -22,9 +23,8 @@ const init = () => {
     const depth = 20;
     const leavesPerNode = 5;
     const zeroValue = 0;
+    tree = new Tree.IncrementalQuinTree(depth, zeroValue, leavesPerNode, poseidonHash)
 
-    FastSemaphore.setHasher("poseidon");
-    tree = FastSemaphore.createTree(depth, zeroValue, leavesPerNode);
 }
 
 const register = (identityCommitment: BigInt): number => {
@@ -42,12 +42,12 @@ const verifyVote = async (votingInputs: VotingInputs): Promise<boolean> => {
 
     if(votedUsers.includes(votingInputs.nullifier)) throw new Error("Double vote");
 
-    const proof: IProof = {
+    const proof: FullProof = {
         proof: votingInputs.proof,
-        publicSignals: [tree.root, votingInputs.nullifier, FastSemaphore.genSignalHash(votingInputs.vote), FastSemaphore.genExternalNullifier(votingInputs.campaignName)]
+        publicSignals: [tree.root, votingInputs.nullifier, genSignalHash(votingInputs.vote), genExternalNullifier(votingInputs.campaignName)]
     };
 
-    const status = await FastSemaphore.verifyProof(verifierKey, proof);
+    const status = await Semaphore.verifyProof(verifierKey, proof);
 
     if(!status) {
         throw new Error("Invalid vote proof");
