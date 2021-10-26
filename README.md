@@ -1,7 +1,7 @@
 # Anonymous voting using Semaphore 
 
 ### Description
-Proof-of-concept application created for the [ETHOnline hackathon](https://online.ethglobal.com/). The app is simple anonymous voting application that uses the [Semaphore](https://semaphore.appliedzkp.org/) construct via [semaphore-lib](https://github.com/akinovak/semaphore-lib). The app uses the FastSemaphore version, which provides better perforamnce. The main goal is to show how to integrate Semaphore easily, and how to enable anonymity on app level. We do not care about sybil-attacks in this PoC, we only disallow for double registrations and double voting.
+Proof-of-concept application created for the [ETHOnline hackathon](https://online.ethglobal.com/). The app is simple anonymous voting application that uses the [Semaphore](https://semaphore.appliedzkp.org/) construct via [libsemaphore](https://github.com/appliedzkp/libsemaphore). The circuits implementation can be found [here](https://github.com/appliedzkp/semaphore/tree/version/2.0.0). The app uses an improved version, called Fast Semaphore (or just Semaphore, as the old version will get deprecated), which provides better perforamnce. The main goal is to show how to integrate Semaphore easily, and how to enable anonymity on app level. We do not care about sybil-attacks in this PoC, we only disallow for double registrations and double voting.
 
 The app features client-server architecture, and is completely offchain (of course this is for demo purposes only and smart-contract architecture can be used instead of a server). 
 
@@ -83,12 +83,12 @@ We first validate the inputs by checking the validity of the campaign and the vo
     if(votedUsers.includes(votingInputs.nullifier)) throw new Error("Double vote");
 
     // proof verification
-    const proof: IProof = {
+    const proof: FullProof = {
         proof: votingInputs.proof,
-        publicSignals: [tree.root, votingInputs.nullifier, FastSemaphore.genSignalHash(votingInputs.vote), FastSemaphore.genExternalNullifier(votingInputs.campaignName)]
+        publicSignals: [tree.root, votingInputs.nullifier, genSignalHash(votingInputs.vote), genExternalNullifier(votingInputs.campaignName)]
     };
 
-    const status = await FastSemaphore.verifyProof(verifierKey, proof);
+    const status = await Semaphore.verifyProof(verifierKey, proof);
 
 ```
 
