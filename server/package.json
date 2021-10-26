@@ -9,7 +9,8 @@
     "express": "^4.17.1",
     "@libsem/identity": "^1.0.17",
     "@libsem/protocols": "^1.0.21",
-    "incrementalquintree": "^1.0.7"
+    "incrementalquintree": "^1.0.7",
+    "circomlibjs": "^0.0.8"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
